@@ -1,0 +1,17 @@
+ssh core@192.168.0.25 "sudo systemctl stop etcd "
+ssh core@192.168.0.26 "sudo systemctl stop etcd "
+ssh core@192.168.0.27 "sudo systemctl stop etcd "
+ssh core@192.168.0.25 "sudo rm -fr /var/lib/etcd && sudo mkdir /var/lib/etcd && sudo chown etcd: /var/lib/etcd && sudo systemctl start etcd"
+ssh core@192.168.0.26 "sudo rm -fr /var/lib/etcd && sudo mkdir /var/lib/etcd && sudo chown etcd: /var/lib/etcd && sudo systemctl start etcd"
+ssh core@192.168.0.27 "sudo rm -fr /var/lib/etcd && sudo mkdir /var/lib/etcd && sudo chown etcd: /var/lib/etcd && sudo systemctl start etcd"
+scp *.json core@192.168.0.25:/home/core
+sleep 10
+ssh core@192.168.0.25 "sudo etcd ls /"
+ssh core@192.168.0.25 "sudo systemctl restart apiserver controller-manager kubelet proxy shceduler"
+ssh core@192.168.0.26 "sudo systemctl restart kubelet proxy"
+ssh core@192.168.0.27 "sudo systemctl restart kubelet proxy"
+ssh core@192.168.0.25 "/opt/bin/kubecfg -c /home/core/redis-master.json create pods"
+ssh core@192.168.0.25 "/opt/bin/kubecfg -c /home/core/redis-master-service.json create services"
+ssh core@192.168.0.25 "/opt/bin/kubecfg -c /home/core/redis-slave-controller.json create replicationControllers"
+ssh core@192.168.0.25 "/opt/bin/kubecfg -c /home/core/redis-slave-service.json create services"
+ssh core@192.168.0.25 "/opt/bin/kubecfg -c /home/core/frontend-controller.json create replicationControllers"
